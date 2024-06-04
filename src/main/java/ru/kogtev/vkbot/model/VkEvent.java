@@ -2,7 +2,7 @@ package ru.kogtev.vkbot.model;
 
 public class VkEvent {
     private String type;
-    private VkEventObject object;
+    private VkEventObject vkEventObject;
     private Long groupId;
     private String eventId;
     private String secret;
@@ -16,11 +16,11 @@ public class VkEvent {
     }
 
     public VkEventObject getObject() {
-        return object;
+        return vkEventObject;
     }
 
-    public void setObject(VkEventObject object) {
-        this.object = object;
+    public void setObject(VkEventObject vkEventObject) {
+        this.vkEventObject = vkEventObject;
     }
 
     public Long getGroupId() {
