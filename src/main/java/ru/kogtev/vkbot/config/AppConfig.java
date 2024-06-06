@@ -1,9 +1,11 @@
 package ru.kogtev.vkbot.config;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
-@Configuration
+@Component
+@Scope("singleton")
 public class AppConfig {
 
     @Value("${vk.token.confirmation}")

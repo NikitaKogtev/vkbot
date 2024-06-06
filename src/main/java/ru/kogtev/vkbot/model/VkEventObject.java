@@ -1,51 +1,67 @@
 package ru.kogtev.vkbot.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import ru.kogtev.vkbot.utils.Constants;
+
 public class VkEventObject {
-    private Integer id;
-    private Integer date;
-    private Integer out;
-    private Integer userId;
-    private Integer readState;
+    @JsonProperty(Constants.EVENT_OBJECT_ID)
+    private int id;
+
+    @JsonProperty(Constants.EVENT_OBJECT_DATE)
+    private int date;
+
+    @JsonProperty(Constants.EVENT_OBJECT_OUT)
+    private int out;
+
+    @JsonProperty(Constants.EVENT_OBJECT_USER_ID)
+    private int userId;
+
+    @JsonProperty(Constants.EVENT_OBJECT_READ_STATE)
+    private int readState;
+
+    @JsonProperty(Constants.EVENT_OBJECT_TITLE)
     private String title;
+
+    @JsonProperty(Constants.EVENT_OBJECT_BODY)
     private String body;
 
-    public Integer getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(int id) {
         this.id = id;
     }
 
-    public Integer getDate() {
+    public int getDate() {
         return date;
     }
 
-    public void setDate(Integer date) {
+    public void setDate(int date) {
         this.date = date;
     }
 
-    public Integer getOut() {
+    public int getOut() {
         return out;
     }
 
-    public void setOut(Integer out) {
+    public void setOut(int out) {
         this.out = out;
     }
 
-    public Integer getUserId() {
+    public int getUserId() {
         return userId;
     }
 
-    public void setUserId(Integer userId) {
+    public void setUserId(int userId) {
         this.userId = userId;
     }
 
-    public Integer getReadState() {
+    public int getReadState() {
         return readState;
     }
 
-    public void setReadState(Integer readState) {
+    public void setReadState(int readState) {
         this.readState = readState;
     }
 

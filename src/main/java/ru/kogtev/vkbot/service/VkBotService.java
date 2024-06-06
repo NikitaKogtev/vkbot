@@ -1,72 +1,42 @@
 package ru.kogtev.vkbot.service;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.kogtev.vkbot.utils.ApiCallback;
 import ru.kogtev.vkbot.config.AppConfig;
+import ru.kogtev.vkbot.utils.ApiMethod;
 import ru.kogtev.vkbot.model.VkEvent;
-import ru.kogtev.vkbot.model.VkEventObject;
-import ru.kogtev.vkbot.utils.VkCallbackEventType;
+
 
 @Service
 public class VkBotService {
-    private final AppConfig appConfig;
+    private static final Logger LOG = LogManager.getLogger(VkBotService.class);
 
-    public VkBotService(AppConfig appConfig) {
-        this.appConfig = appConfig;
+    private final AppConfig config;
+
+    @Autowired
+    public VkBotService(AppConfig config) {
+        this.config = config;
     }
 
-    public String processEvent(VkEvent event) {
-        VkCallbackEventType eventType = VkCallbackEventType.fromString(event.getType());
-        if (eventType == null) {
-            // Неизвестный тип события
-            return "Unknown event type";
-        }
+    public String doResponse(VkEvent event) {
+        if (!event.getSecret().equals(config.getSecretKey())) {
+            LOG.error("Received secret key does not match the one specified in the application.yaml configuration: {}", event.getSecret());
 
-        switch (eventType) {
-            case CONFIRMATION:
-                // Обработка запроса подтверждения сервера
-                return appConfig.getConfirmationToken();
-            case MESSAGE_NEW:
-                // Обработка нового сообщения
-                return handleMessageNew(event.getObject());
-            case MESSAGE_REPLY:
-                // Обработка ответа на сообщение
-                return handleReply(event.getObject());
-            default:
-                // Неизвестный тип события
-                return "Unknown event type";
-        }
-    }
-
-    private String handleMessageNew(VkEventObject eventObject) {
-        // Получаем текст сообщения
-        String messageText = eventObject.getBody();
-
-        // Проверяем, что сообщение не пустое
-        if (messageText != null && !messageText.isEmpty()) {
-            // Логика обработки нового сообщения
-            // В данном случае, просто отправляем подтверждение обработки события
-            return "ok";
-        } else {
-            // Если сообщение пустое, возвращаем ошибку
             return "error";
         }
-    }
 
-    private String handleReply(VkEventObject eventObject) {
-        // Получаем текст ответа на сообщение
-        String replyText = eventObject.getBody();
+        // LOG.debug("Received: {}", event.toString());
 
-        // Проверяем, что ответ не пустой
-        if (replyText != null && !replyText.isEmpty()) {
-            // Логика обработки ответа на сообщение
-            // В данном случае, просто отправляем подтверждение обработки события
-            return "ok";
-        } else {
-            // Если ответ пустой, возвращаем ошибку
-            return "error";
+        if (event.getType() == ApiCallback.CONFIRMATION) {
+            return config.getConfirmationToken();
+        } else if (event.getType() == ApiCallback.MESSAGE_NEW) {
+            System.out.println(event.getType());
+            System.out.println(event.getVkEventObject());
+            new VkBotResponse(event, config.getAccessToken()).processResponse(ApiMethod.MESSAGE_SEND);
         }
+        return "ok";
     }
-
-
-
 }
