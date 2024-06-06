@@ -4,15 +4,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.kogtev.vkbot.utils.ApiCallback;
 import ru.kogtev.vkbot.config.AppConfig;
-import ru.kogtev.vkbot.utils.ApiMethod;
 import ru.kogtev.vkbot.model.VkEvent;
+import ru.kogtev.vkbot.utils.SenderApi;
 
 
 @Service
 public class VkBotService {
-    private static final Logger LOG = LogManager.getLogger(VkBotService.class);
+    private static final Logger LOGGER = LogManager.getLogger(VkBotService.class);
 
     private final AppConfig config;
 
@@ -21,22 +20,24 @@ public class VkBotService {
         this.config = config;
     }
 
-    public String doResponse(VkEvent event) {
-        if (!event.getSecret().equals(config.getSecretKey())) {
-            LOG.error("Received secret key does not match the one specified in the application.yaml configuration: {}", event.getSecret());
+    public String doResponse(VkEvent vkEvent) {
+        if (!vkEvent.getSecret().equals(config.getSecretKey())) {
+            LOGGER.error("Received secret key does not match the one specified in the application.properties" +
+                    " configuration: {}", vkEvent.getSecret());
 
             return "error";
         }
 
-        // LOG.debug("Received: {}", event.toString());
+        LOGGER.debug("Received: {}", vkEvent.toString());
 
-        if (event.getType() == ApiCallback.CONFIRMATION) {
-            return config.getConfirmationToken();
-        } else if (event.getType() == ApiCallback.MESSAGE_NEW) {
-            System.out.println(event.getType());
-            System.out.println(event.getVkEventObject());
-            new VkBotResponse(event, config.getAccessToken()).processResponse(ApiMethod.MESSAGE_SEND);
+        switch (vkEvent.getType()) {
+            case CONFIRMATION:
+                return config.getConfirmationToken();
+            case MESSAGE_NEW:
+                new VkBotResponse(vkEvent, config.getAccessToken()).processResponse(SenderApi.MESSAGE_SEND);
+                break;
         }
+
         return "ok";
     }
 }

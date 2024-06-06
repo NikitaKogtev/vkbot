@@ -1,11 +1,11 @@
 package ru.kogtev.vkbot.utils;
 
-public enum ApiMethod {
-    MESSAGE_SEND(Constants.VK_API_METHOD_MESSAGE_SEND);
+public enum SenderApi {
+    MESSAGE_SEND("messages.send");
 
     private final String methodPath;
 
-    ApiMethod(String methodPath) {
+    SenderApi(String methodPath) {
         this.methodPath = methodPath;
     }
 

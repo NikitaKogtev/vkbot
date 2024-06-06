@@ -13,15 +13,22 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import ru.kogtev.vkbot.model.VkEvent;
-import ru.kogtev.vkbot.utils.ApiMethod;
-import ru.kogtev.vkbot.utils.Constants;
+import ru.kogtev.vkbot.utils.SenderApi;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 
 public class VkBotResponse {
+    public static final String VK_API_ENDPOINT = "https://api.vk.com/method/";
+    public static final String VK_API_VERSION = "5.89";
+
+    private static final Logger LOGGER = LogManager.getLogger(VkBotResponse.class);
+
+
     private final VkEvent vkEvent;
 
     private final String accessToken;
@@ -37,48 +44,45 @@ public class VkBotResponse {
         nameValuePairs.add(new BasicNameValuePair("message", "Вы написали: " + vkEvent.getVkEventObject().getBody()));
         nameValuePairs.add(new BasicNameValuePair("peer_id", String.valueOf(vkEvent.getVkEventObject().getUserId())));
         nameValuePairs.add(new BasicNameValuePair("access_token", accessToken));
-        nameValuePairs.add(new BasicNameValuePair("v", Constants.VK_API_VERSION));
+        nameValuePairs.add(new BasicNameValuePair("v", VK_API_VERSION));
         nameValuePairs.add(new BasicNameValuePair("random_id", String.valueOf(new SecureRandom().nextInt())));
 
         return nameValuePairs;
     }
 
-    public void processResponse(ApiMethod method) {
+    public void processResponse(SenderApi method) {
         try (CloseableHttpClient client = HttpClientBuilder.create()
                 .setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build())
                 .build()) {
-            HttpGet httpGet = new HttpGet(Constants.VK_API_ENDPOINT + method.getMethodPath());
+            HttpGet httpGet = new HttpGet(VK_API_ENDPOINT + method.getMethodPath());
             httpGet.setURI(new URIBuilder(httpGet.getURI()).addParameters(getQueryParameters()).build());
             processResponse(client, httpGet);
         } catch (Exception e) {
-            //  LOG.error(e.getMessage());
-            e.printStackTrace();
+            LOGGER.error(e.getMessage());
         }
     }
 
     private void processResponse(CloseableHttpClient client, HttpGet httpGet) {
         try (CloseableHttpResponse response = client.execute(httpGet)) {
-            //   LOG.debug(httpGet.toString());
+            LOGGER.debug(httpGet.toString());
 
             HttpEntity entity = response.getEntity();
             String responseString = EntityUtils.toString(entity, "UTF-8");
             JsonNode jsonNode = new ObjectMapper().readTree(responseString);
 
-            //    LOG.debug("Received: " + responseString);
+            LOGGER.debug("Received: {}", responseString);
             checkErrors(jsonNode.path("error"));
         } catch (Exception e) {
-            //  LOG.error(e.getMessage());
-            e.printStackTrace();
+            LOGGER.error(e.getMessage());
         }
     }
 
     private void checkErrors(JsonNode jsonNode) {
         if (!jsonNode.isEmpty()) {
-            //  LOG.error("Received an error: '" + jsonNode.path("error_msg").asText() +
-            //         "' with code [" + jsonNode.path("error_code").asText() + "]\n" +
-            //          "The following request parameters were passed:\n" +
-            //          jsonNode.path("request_params").toPrettyString());
+            LOGGER.error("Received an error: '{}' with code [{}]\nThe following request parameters were " +
+                    "passed:\n{}", jsonNode.path("error_msg").asText(),
+                    jsonNode.path("error_code").asText(),
+                    jsonNode.path("request_params").toPrettyString());
         }
     }
-
 }

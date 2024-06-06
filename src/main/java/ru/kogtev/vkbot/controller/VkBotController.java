@@ -12,11 +12,9 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 public class VkBotController {
 
     private final VkBotService vkBotService;
-    private final ObjectMapper objectMapper;
 
-    public VkBotController(VkBotService vkBotService, ObjectMapper objectMapper) {
+    public VkBotController(VkBotService vkBotService) {
         this.vkBotService = vkBotService;
-        this.objectMapper = objectMapper;
     }
 
     @PostMapping
